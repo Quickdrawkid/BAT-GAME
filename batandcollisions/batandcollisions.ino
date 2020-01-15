@@ -16,9 +16,11 @@ constexpr int backgroundSpeed = 1;
 // Limit of the x position of backgrounds
 constexpr int backgroundXLimit = -31;
 
-#define MAX_NUM_ENEMIES 3
-#define DELAY_MODIFIER 4
-#define RESTART_DELAY 300
+constexpr int enemiesCount = 3;
+
+constexpr int delayModifier = 4;
+
+constexpr int restartDelay = 300;
 
 
 //declare global variables here
@@ -76,7 +78,7 @@ struct EnemyList {
   int modB;
 };
 
-EnemyList enemyList[MAX_NUM_ENEMIES] = {
+EnemyList enemyList[enemiesCount] = {
   { 0, 127, 32, 300, false , 0, 32 },
   { 0, 127, 15, 150, false, 0, 15 },
   { 0, 127, 48, 122, false, 0, 48 },
@@ -381,7 +383,7 @@ void enemyspawn(){
 }
 
 void updateenemies(){
-  for (uint8_t i =0; i <MAX_NUM_ENEMIES; i++){
+  for (uint8_t i =0; i <enemiesCount; i++){
     if (enemyList[i].enabled == true){
       if (enemyList[i].enemytype == 0){
         crow(i);
@@ -423,7 +425,7 @@ void enemyReset(int i){
   enemyList[i].x = 130;
   enemyList[i].y = 8*random(1,7);
   enemyList[i].modB = enemyList[i].y;
-  enemyList[i].delaynext = enemyList[i].delaynext / DELAY_MODIFIER;
+  enemyList[i].delaynext = enemyList[i].delaynext / delayModifier;
   enemyList[i].enabled = false;
 }
 
@@ -490,8 +492,8 @@ void crow(int i){
 }
 
 void increaseDifficulty(){
-  if (currentenemyindex == MAX_NUM_ENEMIES){
-    currentdelay = RESTART_DELAY;
+  if (currentenemyindex == enemiesCount){
+    currentdelay = restartDelay;
     currentenemyindex = 0;
   }
 }
