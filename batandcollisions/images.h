@@ -6,6 +6,12 @@
 // For PROGMEM
 #include <avr/pgmspace.h>
 
+uint8_t getImageHeight(const uint8_t *image) { //filmote
+
+  return pgm_read_byte(image + 1);
+
+}
+
 //sprites
 const uint8_t batflap[] PROGMEM
 {

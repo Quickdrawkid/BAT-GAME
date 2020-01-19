@@ -306,19 +306,15 @@ void updateenemies(){
   }
 }
 
-uint8_t getImageHeight(const uint8_t *image) { //filmote
 
-  return pgm_read_byte(image + 1);
 
-}
-
-bool collisionSonic (int enemyX, int enemyY, unsigned char PROGMEM enemySprite) { //adapted from filmote
+bool collisionSonic (int enemyX, int enemyY, const uint8_t *enemySprite) { //adapted from filmote
     
   for (uint8_t i = 0; i < maxSonics; i++) {
 
     if (sonic[i].enabled == true) {
 
-      if (collide(enemyX, enemyY - getImageHeight(enemySprite), enemySprite, sonic[i].x, sonic[i].y - getImageHeight(sonicbullet), sonicbullet)) {
+      if (collide(enemyX, enemyY , enemySprite, sonic[i].x, sonic[i].y , sonicbullet)) { //- getImageHeight(enemySprite)  - getImageHeight(sonicbullet)???
 
         sonic[i].enabled = false;
         return true;
