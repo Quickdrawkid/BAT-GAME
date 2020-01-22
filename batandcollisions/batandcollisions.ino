@@ -27,36 +27,49 @@ constexpr int delayModifier = 4;
 constexpr int restartDelay = 300;
 
 
-//declare global variables here
-int playerx = 5; //player x position (L<R)
-float playery = 10; //player y position (U<D), is float due to fractional rate of descent
-int pxupperlim =120; //player x limits
+// Declare global variables here
+// Player x position (L<R)
+int playerx = 5;
+// Player y position (U<D), is float due to fractional rate of descent
+float playery = 10;
+// Player x limits
+int pxupperlim = 120;
 int pxlowerlim = 0;
-int pyupperlim = 57; //player y limits
+// Player y limits
+int pyupperlim = 57;
 int pylowerlim = 0;
-int pvx = 2; // player x speed
-int vflap = -2;//player flap impetus
-float grav = .2;  //grav force
-float vglide = .8;  // rate at whic bat glides... use .5; for 60 FPS
-float pvy = 1; //player vert speed...this is giving issues at 60 FPS
-int vdive = 4; //player dive speed
-int batsprite = 0; // 0 glide, 1 flap, 2 dive... used to animate
+// Player x speed
+int pvx = 2;
+// Player flap impetus
+int vflap = -2;
+// Grav force
+float grav = .2;
+// Rate at whic bat glides... use .5; for 60 FPS
+float vglide = .8;
+// Player vertical speed...this is giving issues at 60 FPS
+float pvy = 1;
+// Player dive speed
+int vdive = 4;
+
+// 0 glide, 1 flap, 2 dive... used to animate
+int batsprite = 0;
 int currentnumsonic = 0;
-int sonicspeed = 3; //speed of bullets
-int sonicxlim = 130; //limit as to x position of sonics
+// Speed of bullets
+int sonicspeed = 3;
+// Limit as to x position of sonics
+int sonicxlim = 130;
 int currentdelay = 60;
 int currentenemyindex = 0;
 int exlowerlim = -32;
 
-
-
-//declare whatever else
-struct Sonic {
+// Declare whatever else
+struct Sonic
+{
   int x;
   int y;
   bool enabled;
-  };
-  
+};
+
 struct Background
 {
   int x;
@@ -64,15 +77,19 @@ struct Background
   int spriteIndex;
 };
 
-Sonic sonic[maxSonics] = { //first "Sonic" refers to structure, second "sonic" is name of array
-      { 0, 0, false}, // refer to Sonic structure. setting initial values in array of sonics. x=0, y=0, enabled = false (not active)
-      { 0, 0, false}, // total of 5 for max num sonics
-      { 0, 0, false},
-      { 0, 0, false},
-      { 0, 0, false},
-    };
+// First "Sonic" refers to structure, second "sonic" is name of array
+Sonic sonic[maxSonics]
+{
+  // Refer to Sonic structure. setting initial values in array of sonics. x=0, y=0, enabled = false (not active)
+  { 0, 0, false},
+  { 0, 0, false},
+  { 0, 0, false},
+  { 0, 0, false},
+  { 0, 0, false},
+};
 
-struct EnemyList {
+struct EnemyList
+{
   int enemytype;
   int x;
   int y;
@@ -82,7 +99,8 @@ struct EnemyList {
   int modB;
 };
 
-EnemyList enemyList[enemiesCount] = {
+EnemyList enemyList[enemiesCount]
+{
   { 0, 127, 32, 300, false , 0, 32 },
   { 0, 127, 15, 150, false, 0, 15 },
   { 0, 127, 48, 122, false, 0, 48 },
@@ -105,25 +123,26 @@ Background background[maxBackgrounds]
   { 128, 0, 0},
 };
 
-//runs once on startup
-void setup() {
+// Runs once on startup
+void setup()
+{
   arduboy.begin();
   arduboy.clear();
   arduboy.setFrameRate(30); //TBD if 60 frames or 30
-  
 }
 
-//runs continuously 
-void loop() {
-  
-
-  //Prevent the Arduboy from running too fast
+// Runs continuously
+void loop()
+{
+  // Prevent the Arduboy from running too fast
   if (!arduboy.nextFrame()) {
     return;
   }
 
   arduboy.clear();
-  arduboy.pollButtons(); //magic incantation for justPressed etc.
+
+  // Needed for justPressed etc.
+  arduboy.pollButtons();
 
   updateBackgrounds();
   drawBackgrounds();
@@ -133,203 +152,262 @@ void loop() {
   updateSonics();
   bat();
   drawbat();
-  increaseDifficulty(); 
+  increaseDifficulty();
 
-  
   arduboy.display();
 }
 
+void bat()
+{
+  //set batspr to glide, here to prevent sticky sprites
+  batsprite = 0;
 
-
-
-void bat(){
-  batsprite = 0; //set batspr to glide, here to prevent sticky sprites
-  
-  if (arduboy.pressed(LEFT_BUTTON)) { //move left
+  // Move left
+  if (arduboy.pressed(LEFT_BUTTON))
+  {
     playerx = playerx - pvx;
-    if (playerx < pxlowerlim){
-        playerx = pxlowerlim;//prevent movement offscreen
+    if (playerx < pxlowerlim)
+    {
+        //prevent movement offscreen
+        playerx = pxlowerlim;
     }
   }
-  if (arduboy.pressed(RIGHT_BUTTON)) { //move right
+
+  // Move right
+  if (arduboy.pressed(RIGHT_BUTTON))
+  {
     playerx = playerx + pvx;
-    if (playerx > pxupperlim){
+    if (playerx > pxupperlim)
+    {
         playerx = pxupperlim;
     }
   }
-  if (pvy < vglide){ //if vert speed is LESS THAN glide speed
-    pvy = pvy + grav; //increase vert speed by grav force (positive is down)
+
+  // If vertical speed is LESS THAN glide speed
+  if (pvy < vglide)
+  {
+    // Increase vertical speed by grav force (positive is down)
+    pvy = pvy + grav;
   }
-  if (pvy > vglide){ // if vert speed GREATER THAN glide speed
-    pvy = vglide; //slow to glide sped instantly
+
+  // If vertical speed GREATER THAN glide speed
+  if (pvy > vglide)
+  {
+    // Slow to glide sped instantly
+    pvy = vglide;
   }
- 
-  if (arduboy.justPressed(A_BUTTON)) { //flapping, note JUSTPRESSED
-    pvy = vflap; //make vert speed equal flap speed
-    batsprite = 1; //change sprite
+
+  // Flapping, note JUSTPRESSED
+  if (arduboy.justPressed(A_BUTTON))
+  {
+    // Make vert speed equal flap speed
+    pvy = vflap;
+    // Change sprite
+    batsprite = 1;
   }
-  if (arduboy.pressed(DOWN_BUTTON)) { //dive
-    pvy = vdive; //note vdive is greater than vglide
+
+  //dive
+  if (arduboy.pressed(DOWN_BUTTON))
+  {
+    //note vdive is greater than vglide
+    pvy = vdive;
     batsprite = 3;
   }
-   playery = playery + pvy; //must be AFTER dive check, or dive would be negated by glide checks
-  if (playery > pyupperlim){
-    playery = pyupperlim; //prevent moving offscreen
+
+  // Must be AFTER dive check, or dive would be negated by glide checks
+  playery = playery + pvy;
+  if (playery > pyupperlim)
+  {
+    // Prevent moving offscreen
+    playery = pyupperlim;
   }
-  else if (playery <pylowerlim){
-     playery = pylowerlim; //prevent moving offscreen
+  else if (playery < pylowerlim)
+  {
+    // Prevent moving offscreen
+     playery = pylowerlim;
   }
 }
 
-void drawbat(){
+void drawbat()
+{
   //Draw player sprite
-  if (batsprite == 0){ //For whatever reason, could not get a switch statement to work!!!
-      Sprites::drawSelfMasked(playerx, playery, batglide, 0);
+  //For whatever reason, could not get a switch statement to work!!!
+  if (batsprite == 0)
+  {
+    Sprites::drawSelfMasked(playerx, playery, batglide, 0);
   }
-  else if (batsprite == 1){
-      Sprites::drawSelfMasked(playerx, playery, batflap, 0);
+  else if (batsprite == 1)
+  {
+    Sprites::drawSelfMasked(playerx, playery, batflap, 0);
   }
-  else if (batsprite == 3){
-      Sprites::drawSelfMasked(playerx + 4, playery - 9, batdive, 0); //this sprite is differently shaped, hence position modifiers
+  else if (batsprite == 3)
+  {
+    // This sprite is differently shaped, hence position modifiers
+    Sprites::drawSelfMasked(playerx + 4, playery - 9, batdive, 0);
   }
 }
 
-void fireSonics(int sonicnumber) {
+void fireSonics(int sonicnumber)
+{
   sonic[sonicnumber].y = playery + 3;
   sonic[sonicnumber].x = playerx + 8;
   sonic[sonicnumber].enabled = true;
-  
 }
 
-void batfire() {
-   if (arduboy.justPressed(B_BUTTON)) { //shooting, note JUSTPRESSED
-    if (currentnumsonic < maxSonics){ //if less bulets active than max
-       for (uint8_t i = 0; i < maxSonics; i++) { //this loop finds first inactive slot in sonic array
-
-        if (!sonic[i].enabled) {  //if disabled,
-          fireSonics(i); //fire new bullet (item i in array)
+void batfire()
+{
+  // Shooting, note JUSTPRESSED
+  if (arduboy.justPressed(B_BUTTON))
+  {
+    // If less bulets active than max
+    if (currentnumsonic < maxSonics)
+    {
+      // This loop finds first inactive slot in sonic array
+      for (uint8_t i = 0; i < maxSonics; i++)
+      {
+        // If disabled,
+        if (!sonic[i].enabled)
+        {
+          // Fire new bullet (item i in array)
+          fireSonics(i);
           break;
         }
-       currentnumsonic++; //add to count of bullets
-    }
- }}}
-void updateSonics() {
-
-  for (byte i = 0; i < maxSonics; i++) {
-        
-    if (sonic[i].enabled == true) {
-
-      Sprites::drawSelfMasked(sonic[i].x, sonic[i].y, sonicbullet, 0);
-      sonic[i].x = sonic[i].x + sonicspeed; //move sonic to right
-    }
-          
-
-      if (sonic[i].x > sonicxlim) {
-        sonic[i].enabled = false;
-        currentnumsonic--; 
+        // Add to count of bullets
+        currentnumsonic++;
       }
-   
     }
-        
   }
+}
 
-void updateBackgrounds() //Corrected by Pharap. Thank you!!!
+void updateSonics()
+{
+  for (byte i = 0; i < maxSonics; i++)
+  {
+    if (sonic[i].enabled == true)
+    {
+      Sprites::drawSelfMasked(sonic[i].x, sonic[i].y, sonicbullet, 0);
+      // Move sonic to right
+      sonic[i].x = sonic[i].x + sonicspeed;
+    }
+
+    if (sonic[i].x > sonicxlim)
+    {
+      sonic[i].enabled = false;
+      currentnumsonic--;
+    }
+  }
+}
+
+// Corrected by Pharap. Thank you!!!
+void updateBackgrounds()
 {
   for (uint8_t index = 0; index < maxBackgrounds; ++index)
   {
-    
       // Move background left
       background[index].x -= backgroundSpeed;
 
-      
       if (background[index].x < backgroundXLimit)
-      { 
+      {
         int imageIndex = random(0, 3);
         background[index].x = backgroundStart;
         background[index].spriteIndex = imageIndex;
-        
       }
-    
   }
 }
 
-void drawBackgrounds() //could maybe implement sprite rotation for savings? 
+// Could maybe implement sprite rotation for savings?
+void drawBackgrounds()
 {
   for (uint8_t index = 0; index < maxBackgrounds; ++index)
   {
-    if (index < (maxBackgrounds/2)){
-      if (background[index].spriteIndex == 0){
-        Sprites::drawOverwrite(background[index].x, background[index].y, flat, 0); //change flat to sprite index
+    if (index < (maxBackgrounds / 2))
+    {
+      if (background[index].spriteIndex == 0)
+      {
+        // Change flat to sprite index
+        Sprites::drawOverwrite(background[index].x, background[index].y, flat, 0);
       }
-      else if (background[index].spriteIndex == 1){
-        Sprites::drawOverwrite(background[index].x, background[index].y, spikeleft, 0); //change flat to sprite index
+      else if (background[index].spriteIndex == 1)
+      {
+        // Change flat to sprite index
+        Sprites::drawOverwrite(background[index].x, background[index].y, spikeleft, 0);
       }
-      else if (background[index].spriteIndex == 2){
-        Sprites::drawOverwrite(background[index].x, background[index].y, spikeright, 0); //change flat to sprite index
-      } 
+      else if (background[index].spriteIndex == 2)
+      {
+        // Change flat to sprite index
+        Sprites::drawOverwrite(background[index].x, background[index].y, spikeright, 0);
+      }
     }
-    else {
-      if (background[index].spriteIndex == 0){
-        Sprites::drawOverwrite(background[index].x, background[index].y, flatup, 0); //change flat to sprite index
+    else
+    {
+      if (background[index].spriteIndex == 0)
+      {
+        // Change flat to sprite index
+        Sprites::drawOverwrite(background[index].x, background[index].y, flatup, 0);
       }
-      else if (background[index].spriteIndex == 1){
-        Sprites::drawOverwrite(background[index].x, background[index].y, spikeleftup, 0); //change flat to sprite index
+      else if (background[index].spriteIndex == 1)
+      {
+        // Change flat to sprite index
+        Sprites::drawOverwrite(background[index].x, background[index].y, spikeleftup, 0);
       }
-      else if (background[index].spriteIndex == 2){
-        Sprites::drawOverwrite(background[index].x, background[index].y, spikerightup, 0); //change flat to sprite index
+      else if (background[index].spriteIndex == 2)
+      {
+        // Change flat to sprite index
+        Sprites::drawOverwrite(background[index].x, background[index].y, spikerightup, 0);
       }
     }
   }
 }
 
-
-void enemyspawn(){
-  if (currentdelay > 0){
+void enemyspawn()
+{
+  if (currentdelay > 0)
+  {
     currentdelay--;
   }
-  else if (currentdelay == 0){ //must be ==0. -1 will halt list progression until boss defeated
+  // Must be == 0. -1 will halt list progression until boss defeated
+  else if (currentdelay == 0)
+  {
     enemyList[currentenemyindex].enabled = true;
     currentdelay = enemyList[currentenemyindex].delaynext;
     currentenemyindex++;
   }
 }
 
-void updateenemies(){
-  for (uint8_t i =0; i <enemiesCount; i++){
-    if (enemyList[i].enabled == true){
-      if (enemyList[i].enemytype == 0){
+void updateenemies()
+{
+  for (uint8_t i =0; i <enemiesCount; i++)
+  {
+    if (enemyList[i].enabled == true)
+    {
+      if (enemyList[i].enemytype == 0)
+      {
         crow(i);
       }
-     
-      
     }
   }
 }
 
-
-
-bool collisionSonic (int enemyX, int enemyY, const uint8_t *enemySprite) { //adapted from filmote
-    
-  for (uint8_t i = 0; i < maxSonics; i++) {
-
-    if (sonic[i].enabled == true) {
-
-      if (collide(enemyX, enemyY , enemySprite, sonic[i].x, sonic[i].y , sonicbullet)) { //- getImageHeight(enemySprite)  - getImageHeight(sonicbullet)???
-
+// Adapted from filmote
+bool collisionSonic (int enemyX, int enemyY, const uint8_t *enemySprite)
+{
+  for (uint8_t i = 0; i < maxSonics; i++)
+  {
+    if (sonic[i].enabled == true)
+    {
+      if (collide(enemyX, enemyY , enemySprite, sonic[i].x, sonic[i].y , sonicbullet))
+      {
         sonic[i].enabled = false;
         return true;
-          
       }
-      
     }
-    
   }
 
   return false;
- 
 }
 
-void enemyReset(int i){
+void enemyReset(int i)
+{
   enemyList[i].x = 130;
   enemyList[i].y = 8*random(1,7);
   enemyList[i].modB = enemyList[i].y;
@@ -337,70 +415,88 @@ void enemyReset(int i){
   enemyList[i].enabled = false;
 }
 
-void destroyEnemy(int i){ //can be updated to include a death anim?
+// Can be updated to include a death anim?
+void destroyEnemy(int i)
+{
   enemyReset(i);
 }
 
-void drawcrow(int i, int crowsprite){
+void drawcrow(int i, int crowsprite)
+{
   //Draw player sprite
-  if (crowsprite == 0){ 
-      Sprites::drawSelfMasked(enemyList[i].x, enemyList[i].y, crowglide, 0);
+  if (crowsprite == 0)
+  {
+    Sprites::drawSelfMasked(enemyList[i].x, enemyList[i].y, crowglide, 0);
   }
-  else if (crowsprite == 1){
-      Sprites::drawSelfMasked(enemyList[i].x, enemyList[i].y, crowflap, 0);
+  else if (crowsprite == 1)
+  {
+    Sprites::drawSelfMasked(enemyList[i].x, enemyList[i].y, crowflap, 0);
   }
-  
+
 }
 
-
-
-void crow(int i){
-
+void crow(int i)
+{
   int crowsprite = 1;
   int crowvx = 1;
   int crowvglide = 1;
   int grav = 1;
   int crowvflap = -4;
-  
-  if (enemyList[i].modA>0){
-    crowsprite = 0; //set crowspr to glide, here to prevent sticky sprites ---could be local sprite
-  }
-  
 
-  enemyList[i].x = enemyList[i].x-crowvx; //move left
-  
-    
-  if (enemyList[i].modA < crowvglide){ //if vert speed is LESS THAN glide speed---crow vglide could be local
-    enemyList[i].modA = enemyList[i].modA + grav; //increase vert speed by grav force (positive is down)---grav could be local
+  // Set crowspr to glide, here to prevent sticky sprites ---could be local sprite
+  if (enemyList[i].modA > 0)
+  {
+    crowsprite = 0;
   }
-  
- 
-  if (enemyList[i].y > enemyList[i].modB) { //flapping, note JUSTPRESSED
-    enemyList[i].modA = crowvflap; //make vert speed equal flap speed -- crowvflap local?
-    crowsprite = 1; //change sprite
+
+  // Move left
+  enemyList[i].x = enemyList[i].x - crowvx;
+
+  // If vert speed is LESS THAN glide speed---crow vglide could be local
+  if (enemyList[i].modA < crowvglide)
+  {
+    // Increase vert speed by grav force (positive is down)---grav could be local
+    enemyList[i].modA = enemyList[i].modA + grav;
   }
-  
-  enemyList[i].y = enemyList[i].y + enemyList[i].modA; //must be AFTER dive check, or dive would be negated by glide checks
-  if (crowsprite == 1){
-    if (collisionSonic(enemyList[i].x, enemyList[i].y, crowflap)){
+
+  // Flapping, note JUSTPRESSED
+  if (enemyList[i].y > enemyList[i].modB)
+  {
+    // Make vertical speed equal flap speed -- crowvflap local?
+    enemyList[i].modA = crowvflap;
+    // Change sprite
+    crowsprite = 1;
+  }
+
+  // Must be AFTER dive check, or dive would be negated by glide checks
+  enemyList[i].y = enemyList[i].y + enemyList[i].modA;
+  if (crowsprite == 1)
+  {
+    if (collisionSonic(enemyList[i].x, enemyList[i].y, crowflap))
+    {
       destroyEnemy(i);
     }
   }
-  else{
-    if(collisionSonic(enemyList[i].x, enemyList[i].y, crowglide)){
+  else
+  {
+    if(collisionSonic(enemyList[i].x, enemyList[i].y, crowglide))
+    {
       destroyEnemy(i);
     }
   }
   drawcrow(i, crowsprite);
 
-  if (enemyList[i].x < exlowerlim){ //reset enemy when it moves offscreen
-    enemyReset(i);    
+  // Reset enemy when it moves offscreen
+  if (enemyList[i].x < exlowerlim)
+  {
+    enemyReset(i);
   }
-  
 }
 
-void increaseDifficulty(){
-  if (currentenemyindex == enemiesCount){
+void increaseDifficulty()
+{
+  if (currentenemyindex == enemiesCount)
+  {
     currentdelay = restartDelay;
     currentenemyindex = 0;
   }
