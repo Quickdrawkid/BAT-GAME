@@ -35,6 +35,13 @@ const uint8_t batdive[] PROGMEM
 	0x00, 0x1f, 0x7f, 0xf8, 0xdf, 0xff, 0x58, 0x00, 
 };
 
+const unsigned char PROGMEM batCollisionMask[] =
+{
+// width, height,
+5, 5,
+0x0e, 0x1f, 0x1f, 0x1f, 0x0e, 
+};
+
 const uint8_t sonicbullet[] PROGMEM
 {
 	// width, height,
