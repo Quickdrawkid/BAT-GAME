@@ -7,9 +7,14 @@
 #include <avr/pgmspace.h>
 
 // Originally written by filmote
-uint8_t getImageHeight(const uint8_t * image)
+inline uint8_t getImageHeight(const uint8_t * image)
 {
 	return pgm_read_byte(&image[1]);
+}
+
+inline uint8_t getImageWidth(const uint8_t * image)
+{
+	return pgm_read_byte(&image[0]);
 }
 
 //sprites
