@@ -91,10 +91,22 @@ Sonic sonic[maxSonics]
   { 0, 0, false},
 };
 
-//add enemy sprite frame to this Struct and array.
-struct EnemyList
+enum class EnemyType : uint8_t
 {
-  int enemytype;
+  Crow,
+  Skull,
+  Illegible,
+  Wisp,
+  Ghost,
+  FlyingSnake,
+  Eyeball,
+  Owl,
+};
+
+//add enemy sprite frame to this Struct and array.
+struct Enemy
+{
+  EnemyType enemytype;
   int x;
   int y;
   int delaynext; //should count DOWN one unit per frame
@@ -103,12 +115,11 @@ struct EnemyList
   int modB;
 };
 
-
-EnemyList enemyList[enemiesCount]
+Enemy enemyList[enemiesCount]
 {
-  { 0, 127, 32, 300, false , 0, 32 },
-  { 0, 127, 15, 150, false, 0, 15 },
-  { 0, 127, 48, 122, false, 0, 48 },
+  { EnemyType::Crow, 127, 32, 300, false , 0, 32 },
+  { EnemyType::Crow, 127, 15, 150, false, 0, 15 },
+  { EnemyType::Crow, 127, 48, 122, false, 0, 48 },
 };
 
 // First "Background" refers to structure, second "background" is name of array
@@ -390,7 +401,7 @@ void updateenemies()
   {
     if (enemyList[i].enabled == true)
     {
-      if (enemyList[i].enemytype == 0)
+      if (enemyList[i].enemytype == EnemyType::Crow)
       {
         crow(i);
       }
