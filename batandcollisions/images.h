@@ -6,10 +6,15 @@
 // For PROGMEM
 #include <avr/pgmspace.h>
 
-uint8_t getImageHeight(const uint8_t *image) { //filmote
+// Originally written by filmote
+inline uint8_t getImageHeight(const uint8_t * image)
+{
+	return pgm_read_byte(&image[1]);
+}
 
-  return pgm_read_byte(image + 1);
-
+inline uint8_t getImageWidth(const uint8_t * image)
+{
+	return pgm_read_byte(&image[0]);
 }
 
 //sprites
